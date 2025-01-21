@@ -1,0 +1,8 @@
+Welcome to the File Download Example!
+
+This is a sample text file to demonstrate the functionality of file upload and download in a Next.js application. 
+
+Feel free to customize this file or replace it with any other file to test the download feature.
+
+Happy Coding!
+- The Development Team
