@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { Upload, Download, File as FileIcon } from "lucide-react";
@@ -64,45 +65,84 @@ export default function FileUploadDownload() {
     }
   };
 
+  // const handleUpload = async () => {
+  //   if (!fileState.file) {
+  //     return;
+  //   }
+
+  //   setIsLoading((prev) => ({ ...prev, upload: true }));
+  //   const formData = new FormData();
+  //   formData.append("file", fileState.file);
+
+  //   try {
+  //     const response = await axios.post<UploadResponse>(
+  //       "/api/upload",
+  //       formData,
+  //       {
+  //         headers: { "Content-Type": "multipart/form-data" },
+  //         onUploadProgress: (progressEvent) => {
+  //           const progress = progressEvent.total
+  //             ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+  //             : 0;
+  //           setFileState((prev) => ({ ...prev, uploadProgress: progress }));
+  //         },
+  //       }
+  //     );
+
+  //     if (response.data.success) {
+  //       alert("File uploaded successfully!");
+  //       setFileState({ file: null, uploadProgress: 0 });
+  //     }
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error instanceof AxiosError
+  //         ? error.response?.data?.message || "Upload failed"
+  //         : "An unexpected error occurred";
+  //     alert(errorMessage);
+  //   } finally {
+  //     setIsLoading((prev) => ({ ...prev, upload: false }));
+  //   }
+  // };
+
+
+
   const handleUpload = async () => {
     if (!fileState.file) {
       return;
     }
-
+  
     setIsLoading((prev) => ({ ...prev, upload: true }));
     const formData = new FormData();
-    formData.append("file", fileState.file);
-
+    formData.append('file', fileState.file);
+  
     try {
-      const response = await axios.post<UploadResponse>(
-        "/api/upload",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            const progress = progressEvent.total
-              ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              : 0;
-            setFileState((prev) => ({ ...prev, uploadProgress: progress }));
-          },
-        }
-      );
-
+      const response = await axios.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (progressEvent) => {
+          const progress = progressEvent.total
+            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            : 0;
+          setFileState((prev) => ({ ...prev, uploadProgress: progress }));
+        },
+      });
+  
       if (response.data.success) {
-        alert("File uploaded successfully!");
+        alert('File uploaded successfully!');
+        console.log('File URL:', response.data.url); // S3 File URL
         setFileState({ file: null, uploadProgress: 0 });
       }
     } catch (error) {
       const errorMessage =
         error instanceof AxiosError
-          ? error.response?.data?.message || "Upload failed"
-          : "An unexpected error occurred";
+          ? error.response?.data?.message || 'Upload failed'
+          : 'An unexpected error occurred';
       alert(errorMessage);
     } finally {
       setIsLoading((prev) => ({ ...prev, upload: false }));
     }
   };
 
+  
   const handleDownload = async () => {
     setIsLoading((prev) => ({ ...prev, download: true }));
 
@@ -114,7 +154,7 @@ export default function FileUploadDownload() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "sunil.txt");
+      link.setAttribute("download", "dowanloaded_file");
       document.body.appendChild(link);
       link.click();
 
