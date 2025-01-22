@@ -128,7 +128,7 @@ export default function FileUploadDownload() {
   
       if (response.data.success) {
         alert('File uploaded successfully!');
-        console.log('File URL:', response.data.url); // S3 File URL
+        console.log('File URL:', response.data.url); 
         setFileState({ file: null, uploadProgress: 0 });
       }
     } catch (error) {
