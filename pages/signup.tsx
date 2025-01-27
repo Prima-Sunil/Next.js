@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -8,11 +9,57 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const validatePassword = (password: string) => {
+    // Initialize validation object
+    const validation: { isValid: boolean; errors: string[] } = {
+      isValid: false,
+      errors: []
+    };
+  
+    // Check minimum length
+    if (password.length < 8) {
+      validation.errors.push("Password must be at least 8 characters long");
+    }
+  
+    // Check for capital letter
+    if (!/[A-Z]/.test(password)) {
+      validation.errors.push("Password must contain at least one capital letter");
+    }
+  
+    // Check for lowercase letter
+    if (!/[a-z]/.test(password)) {
+      validation.errors.push("Password must contain at least one lowercase letter");
+    }
+  
+    // Check for number
+    if (!/[0-9]/.test(password)) {
+      validation.errors.push("Password must contain at least one number");
+    }
+  
+    // Password is valid if there are no errors
+    validation.isValid = validation.errors.length === 0;
+  
+    return validation;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    const validation = validatePassword(newPassword);
+    setPasswordErrors(validation.errors);
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setError(validation.errors.join(' '));
+      return;
+    }
     setError('');
     setIsLoading(true);
 
@@ -48,7 +95,7 @@ export default function SignupPage() {
           <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
           
           {error && (
-            <div className="mb-4 text-red-500">
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
             </div>
           )}
@@ -91,11 +138,27 @@ export default function SignupPage() {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               disabled={isLoading}
             />
+            {passwordErrors.length > 0 && (
+              <ul className="mt-1 text-sm text-red-500">
+                {passwordErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-2 text-sm text-gray-500">
+              Password must:
+              <ul className="list-disc ml-5">
+                <li>Be at least 8 characters long</li>
+                <li>Contain at least one capital letter</li>
+                <li>Contain at least one lowercase letter</li>
+                <li>Contain at least one number</li>
+              </ul>
+            </div>
           </div>
 
           <button
