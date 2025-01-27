@@ -4,6 +4,9 @@
 // / eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useRef, useState } from "react";
 import axios, { AxiosError } from "axios";
+import { useEffect } from "react";
+import {useRouter} from 'next/router';
+import { useAuth } from "@/context/AuthContext";
 import { Upload, Download, File as FileIcon, Folder } from "lucide-react";
 
 interface FileState {
@@ -22,6 +25,14 @@ interface UploadResponse {
 }
 
 export default function FileUploadDownload() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login'); // Redirect to login if not authenticated
+    }
+  }, [user, router]);
   const [fileState, setFileState] = useState<FileState>({
     file: null,
     folder: null,
