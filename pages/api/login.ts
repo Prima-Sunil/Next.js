@@ -1,37 +1,55 @@
-// import User from "@/models/userModel";
-// import bcryptjs from "bcryptjs";
-// import jwt from "jsonwebtoken";
-// import dbConnect from "@/utils/dbConnect";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextApiRequest, NextApiResponse } from "next";
+import bcrypt from "bcrypt";
+import clientPromise from "@/lib/mongodb";
 
-// export async function POST(req: Request) {
-//   try {
-//     const { email, password } = await req.json();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, message: "Method not allowed" });
+  }
 
-//     // Connect to the database
-//     await dbConnect();
+  try {
+    const client = await clientPromise;
+    const db = client.db();
 
-//     // Find the user by email
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return new Response(JSON.stringify({ error: "Invalid email or password" }), { status: 400 });
-//     }
+    const { email, password } = req.body;
 
-//     // Check if the password matches
-//     const isMatch = await bcryptjs.compare(password, user.password);
-//     if (!isMatch) {
-//       return new Response(JSON.stringify({ error: "Invalid email or password" }), { status: 400 });
-//     }
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required" });
+    }
 
-//     // Generate a JWT token
-//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const user = await db.collection("users").findOne({ email });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
 
-//     // Return success response
-//     return new Response(
-//       JSON.stringify({ message: "Login successful", token }),
-//       { status: 200 }
-//     );
-//   } catch (error: any) {
-//     console.error(error);
-//     return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
-//   }
-// }
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Please verify your email first" });
+    }
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Return user data (excluding password)
+    const { password: _, ...userData } = user;
+    return res.status(200).json({ success: true, user: userData });
+  } catch (error) {
+    console.error("Login Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}

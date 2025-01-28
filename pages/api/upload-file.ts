@@ -4,6 +4,7 @@ import { S3 } from 'aws-sdk';
 
 import formidable, { IncomingForm } from 'formidable';
 import fs from 'fs';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
   api: {
@@ -17,7 +18,6 @@ const s3 = new S3({
   region: process.env.AWS_REGION, 
 });
 
-import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -32,6 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ message: 'Error parsing the file' });
       }
 
+      // edit code for make a folder at s3 bucket
+      // pass user id from frontend
+     const userId=fields.userId;
+     if(!userId){
+      return res.status(400).json({ message: 'User Id is required' });
+     }
+
       if (!files.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
@@ -44,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const params = {
         Bucket: process.env.AWS_BUCKET_NAME, 
-        Key: `uploads/${file.originalFilename}`, 
+        Key: `${userId}/uploads/${file.originalFilename}`, 
         Body: fileStream,
         ContentType: file.mimetype || undefined, 
       };

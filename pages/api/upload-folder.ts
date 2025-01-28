@@ -3,6 +3,7 @@
 import { S3 } from 'aws-sdk';
 import formidable, { IncomingForm } from 'formidable';
 import fs from 'fs';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
   api: {
@@ -16,7 +17,7 @@ const s3 = new S3({
   region: process.env.AWS_REGION,
 });
 
-import { NextApiRequest, NextApiResponse } from 'next';
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -32,7 +33,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Error parsing the files:', err);
         return res.status(500).json({ message: 'Error parsing the files' });
       }
-
+      const userId=fields.userId;
+      if(!userId){
+        return res.status(400).json({ message: 'User Id is required' });
+      }
       if (!files.files || !Array.isArray(files.files)) {
         return res.status(400).json({ message: 'No files uploaded' });
       }
@@ -46,11 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         for (const file of files.files) {
           const fileStream = fs.createReadStream(file.filepath);
+          const s3Key=`${userId}/uploads/${file.originalFilename}`;
 
          
-          const folderName = fields.folderName ; 
-          const s3Key = `${folderName}/${file.originalFilename}`; 
-          console.log({folderName, s3Key});
+          // const folderName = fields.folderName ; 
+          // const s3Key = `${folderName}/${file.originalFilename}`; 
+          console.log({s3Key});
 
           const params = {
             Bucket: process.env.AWS_BUCKET_NAME,

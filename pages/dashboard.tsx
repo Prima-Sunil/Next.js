@@ -73,7 +73,7 @@ export default function FileUploadDownload() {
 
   
   const handleUpload = async () => {
-    if (!fileState.file && !fileState.folder) {
+    if (!fileState.file && !fileState.folder || isLoading.upload) {
       return;
     }
 
@@ -82,6 +82,9 @@ export default function FileUploadDownload() {
     // formData.append('file', fileState.file);
 
     try {
+      formData.append("userId", user?._id || "");
+      console.log("user id",user?._id);
+      // formData.append("userId", user.id);
       if (fileState.type === "file" && fileState.file) {
         // Single file upload to S3
         formData.append("file", fileState.file);
@@ -230,7 +233,9 @@ export default function FileUploadDownload() {
                 ref={folderInputRef}
                 className="hidden"
                 onChange={handleFolderChange}
-                webkitdirectory ="true"
+                webkitdirectory="true"        // Enable folder upload in Chrome/Edge
+                mozdirectory="true"           // Enable folder upload in Firefox
+                msdirectory="true"  
                 multiple
                 // directory
               />
@@ -257,7 +262,7 @@ export default function FileUploadDownload() {
               </span>
             </div>
           )}
-          {/* no change */}
+
           {fileState.uploadProgress > 0 && fileState.uploadProgress < 100 && (
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
@@ -268,6 +273,7 @@ export default function FileUploadDownload() {
           )}
 
           <button
+            // disabled={isLoading.upload}
             onClick={handleUpload}
             disabled={
               (!fileState.file && !fileState.folder) || isLoading.upload
@@ -297,7 +303,7 @@ export default function FileUploadDownload() {
           </div>
         </div>
 
-        {/* dowanload button */}
+        {/* dowanload button  yaha se start*/}
         <button
           onClick={handleDownload}
           disabled={isLoading.download}
@@ -316,99 +322,3 @@ export default function FileUploadDownload() {
     </div>
   );
 }
-
-// "use client"; // Marks the component as client-side
-
-// import { useState } from "react";
-
-// export default function Home() {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     email: "",
-//     password: "",
-//   });
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setFormData({ ...formData, [name]: value });
-//   };
-
-//   // const handleSubmit = (e: React.FormEvent) => {
-//   //   e.preventDefault();
-//   //   console.log("Form Submitted:", formData);
-//   //   alert(`Sign-up successful! Welcome, ${formData.name}.`);
-//   //   // Add your API call or submission logic here.
-//   // };
-//   const handleSubmit=async(e: React.FormEvent)=>{
-//      e.preventDefault();
-//      try {
-//       await axios.post("api/users", {
-//         name: formData.name,
-//         email: formData.email,
-//         password: formData.password,
-//       });
-//       alert(`Sign-up successful! Welcome, ${formData.name}.`);
-//      }
-//      catch (err) {
-//       console.log(err);
-//      }
-//   }
-
-//   return (
-//     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-//       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-//         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Sign Up</h1>
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <div>
-//             <label htmlFor="name" className="block text-gray-700">
-//               Name
-//             </label>
-//             <input
-//               type="text"
-//               id="name"
-//               name="name"
-//               value={formData.name}
-//               onChange={handleChange}
-//               required
-//               className="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             />
-//           </div>
-//           <div>
-//             <label htmlFor="email" className="block text-gray-700">
-//               Email
-//             </label>
-//             <input
-//               type="email"
-//               id="email"
-//               name="email"
-//               value={formData.email}
-//               onChange={handleChange}
-//               required
-//               className="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             />
-//           </div>
-//           <div>
-//             <label htmlFor="password" className="block text-gray-700">
-//               Password
-//             </label>
-//             <input
-//               type="password"
-//               id="password"
-//               name="password"
-//               value={formData.password}
-//               onChange={handleChange}
-//               required
-//               className="w-full mt-2 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             />
-//           </div>
-//           <button
-//             type="submit"
-//             className="w-full py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition duration-200"
-//           >
-//             Sign Up
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
